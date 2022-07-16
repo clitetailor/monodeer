@@ -43,7 +43,9 @@ export class Builder {
   }
 
   or(subexprs: Expression[]): Or {
-    return new Or();
+    return new Or({
+      subexprs,
+    });
   }
 
   option(subexprs: Expression[]): Option {
