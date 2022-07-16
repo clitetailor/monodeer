@@ -22,15 +22,15 @@ export class Many implements Expression {
     const marker = cursor.clone();
     const items: any[] = [];
 
-    let success = true;
-    while (!cursor.isEof()) {
+    let matched = true;
+    while (!cursor.isEof() && matched) {
       const exprResult = this.seq.parse(cursor);
 
       if (exprResult.match) {
-        success = true;
+        matched = true;
         items.push(exprResult.result);
       } else {
-        success = false;
+        matched = false;
       }
     }
 
