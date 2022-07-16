@@ -57,7 +57,9 @@ export class Builder {
   }
 
   many(subexprs: Expression[]): Many {
-    return new Many();
+    return new Many({
+      subexprs,
+    });
   }
 
   delimiter(subexprs: Expression[], delimiter: string): Delimiter {
