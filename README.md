@@ -1,3 +1,3 @@
 # Monodeer
 
-An experimental parsing toolkit for simplicity.
+A parsing toolkit for simplicity.
