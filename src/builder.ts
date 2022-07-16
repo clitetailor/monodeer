@@ -39,7 +39,9 @@ export class Builder {
   }
 
   seq(subexprs: Expression[]): Seq {
-    return new Seq();
+    return new Seq({
+      subexprs,
+    });
   }
 
   or(subexprs: Expression[]): Or {
@@ -49,7 +51,9 @@ export class Builder {
   }
 
   option(subexprs: Expression[]): Option {
-    return new Option();
+    return new Option({
+      subexprs,
+    });
   }
 
   many(subexprs: Expression[]): Many {
