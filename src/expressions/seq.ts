@@ -13,8 +13,26 @@ export class Seq implements Expression {
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const marker = cursor.clone();
+    const items: any[] = [];
+
+    for (const subexpr of this.subexprs) {
+      const exprResult = subexpr.parse(cursor);
+
+      items.push(exprResult.result);
+
+      if (!exprResult.match) {
+        cursor.moveTo(marker);
+
+        return {
+          match: false,
+        };
+      }
+    }
+
     return {
-      match: false,
+      match: true,
+      result: items,
     };
   }
 }
