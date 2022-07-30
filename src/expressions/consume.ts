@@ -1,21 +1,28 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Scanner } from "../scanner";
 
 interface ConsumeOptions {
   tokenOrScanner: Scanner | string | RegExp;
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class Consume implements Expression {
   token: Scanner | string | RegExp;
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  _transform?: (options: TransformOptions) => ExpressionResult;
 
-  constructor({ tokenOrScanner }: ConsumeOptions) {
+  constructor({ tokenOrScanner, transform }: ConsumeOptions) {
     this.token = tokenOrScanner;
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     if (typeof this.token === "string") {
       return this.parseString(cursor);
     }
@@ -43,10 +50,6 @@ export class Consume implements Expression {
       };
     }
 
-    if (this.notmatch) {
-      return this.notmatch(cursor);
-    }
-
     return {
       match: false,
     };
@@ -69,12 +72,12 @@ export class Consume implements Expression {
       };
     }
 
-    if (this.notmatch) {
-      return this.notmatch(cursor);
-    }
-
     return {
       match: false,
     };
+  }
+
+  transform(transformer: (option: TransformOptions) => ExpressionResult) {
+    this._transform = transformer;
   }
 }

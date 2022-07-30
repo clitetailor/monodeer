@@ -1,24 +1,31 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Seq } from "./seq";
 
 export interface ManyOptions {
   atLeast?: number;
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class Many implements Expression {
   atLeast: number;
   seq: Expression;
-  notmatch: (cursor: Cursor) => ExpressionResult;
+  _transform?: (options: TransformOptions) => ExpressionResult;
 
-  constructor({ subexprs, atLeast }: ManyOptions) {
+  constructor({ subexprs, atLeast, transform }: ManyOptions) {
     this.seq = new Seq({ subexprs });
     this.atLeast = atLeast ?? 0;
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     const marker = cursor.clone();
     const items: any[] = [];
 
@@ -43,12 +50,12 @@ export class Many implements Expression {
 
     cursor.moveTo(marker);
 
-    if (this.notmatch) {
-      return this.notmatch(cursor);
-    }
-
     return {
       match: false,
     };
+  }
+
+  transform(transformer: (option: TransformOptions) => ExpressionResult) {
+    this._transform = transformer;
   }
 }

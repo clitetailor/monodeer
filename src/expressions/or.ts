@@ -1,21 +1,27 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 
 interface OrOptions {
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class Or implements Expression {
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  _transform?: (option: TransformOptions) => ExpressionResult;
 
-  constructor({ subexprs, notmatch }: OrOptions) {
+  constructor({ subexprs, transform }: OrOptions) {
     this.subexprs = subexprs;
-    this.notmatch = notmatch;
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     const marker = cursor.clone();
 
     for (const subexpr of this.subexprs) {
@@ -28,12 +34,12 @@ export class Or implements Expression {
       cursor.moveTo(marker);
     }
 
-    if (this.notmatch) {
-      return this.notmatch(cursor);
-    }
-
     return {
       match: false,
     };
+  }
+
+  transform(transformer: (option: TransformOptions) => ExpressionResult) {
+    this._transform = transformer;
   }
 }

@@ -1,22 +1,28 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Seq } from "./seq";
 
 interface OptionOptions {
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class Option implements Expression {
   seq: Expression;
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  _transform?: (option: TransformOptions) => ExpressionResult;
 
-  constructor({ subexprs, notmatch }: OptionOptions) {
+  constructor({ subexprs, transform }: OptionOptions) {
     this.seq = new Seq({ subexprs });
-    this.notmatch = notmatch;
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     const marker = cursor.clone();
 
     const exprResult = this.seq.parse(cursor);
@@ -26,10 +32,6 @@ export class Option implements Expression {
     }
 
     cursor.moveTo(marker);
-
-    if (this.notmatch) {
-      return this.notmatch(cursor);
-    }
 
     return {
       match: false,

@@ -8,3 +8,8 @@ export interface ExpressionResult {
   match: boolean;
   result?: any;
 }
+
+export interface TransformOptions {
+  result?: any;
+  match: boolean;
+}

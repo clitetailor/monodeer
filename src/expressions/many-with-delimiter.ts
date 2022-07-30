@@ -1,32 +1,31 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Many } from "./many";
 import { Seq } from "./seq";
 
 interface ManyWithDelimiterOptions {
   atLeast?: number;
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
   delimiter: Expression;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class ManyWithDelimiter implements Expression {
   atLeast: number;
   head: Expression;
   subseq: Expression;
-  notmatch?: (cursor: Cursor) => ExpressionResult;
+  _transform?: (options: TransformOptions) => ExpressionResult;
 
   constructor({
     atLeast,
     subexprs,
-    notmatch,
     delimiter,
+    transform,
   }: ManyWithDelimiterOptions) {
     this.atLeast = atLeast ?? 0;
 
     const element = new Seq({
       subexprs,
-      notmatch,
     });
 
     this.head = element;
@@ -34,9 +33,17 @@ export class ManyWithDelimiter implements Expression {
       atLeast: (atLeast ?? 1) - 1,
       subexprs: [delimiter, element],
     });
+
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     const marker = cursor.clone();
 
     let items: any[] = [];
@@ -50,10 +57,6 @@ export class ManyWithDelimiter implements Expression {
         };
       }
 
-      if (this.notmatch) {
-        return this.notmatch(cursor);
-      }
-
       return {
         match: false,
       };
@@ -63,10 +66,6 @@ export class ManyWithDelimiter implements Expression {
 
     const subseqExprResult = this.subseq.parse(cursor);
     if (!subseqExprResult.match) {
-      if (this.notmatch) {
-        return this.notmatch(cursor);
-      }
-
       return {
         match: false,
       };
@@ -78,5 +77,9 @@ export class ManyWithDelimiter implements Expression {
       match: true,
       result: items,
     };
+  }
+
+  transform(transformer: (option: TransformOptions) => ExpressionResult) {
+    this._transform = transformer;
   }
 }

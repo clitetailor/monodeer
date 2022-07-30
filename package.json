@@ -10,5 +10,11 @@
     "parsing"
   ],
   "author": "clitetailor",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.2.220",
+    "@swc/jest": "^0.2.22",
+    "jest": "^28.1.3"
+  }
 }

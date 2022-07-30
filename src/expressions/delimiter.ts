@@ -1,17 +1,18 @@
 import { Cursor } from "../cursor";
-import { Expression, ExpressionResult } from "../expression";
+import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Seq } from "./seq";
 
 interface DelimiterOptions {
   subexprs: Expression[];
-  notmatch?: (cursor: Cursor) => ExpressionResult;
   delimiter: Expression;
+  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
 export class Delimiter implements Expression {
   subseq: Expression;
+  _transform?: (options: TransformOptions) => ExpressionResult;
 
-  constructor({ subexprs, notmatch, delimiter }: DelimiterOptions) {
+  constructor({ subexprs, delimiter, transform }: DelimiterOptions) {
     const subseqSubexprs: Expression[] = subexprs
       .map((subexpr, index) => {
         return index > 0 ? [delimiter, subexpr] : [subexpr];
@@ -20,11 +21,21 @@ export class Delimiter implements Expression {
 
     this.subseq = new Seq({
       subexprs: subseqSubexprs,
-      notmatch,
     });
+    this._transform = transform;
   }
 
   parse(cursor: Cursor): ExpressionResult {
+    const exprResult = this._parse(cursor);
+
+    return this._transform ? this._transform(exprResult) : exprResult;
+  }
+
+  _parse(cursor: Cursor): ExpressionResult {
     return this.subseq.parse(cursor);
+  }
+
+  transform(transformer: (option: TransformOptions) => ExpressionResult) {
+    this._transform = transformer;
   }
 }
