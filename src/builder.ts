@@ -1,3 +1,4 @@
+import { RuleMissingError } from "./errors/rule-missing";
 import { Expression } from "./expression";
 import { Consume } from "./expressions/consume";
 import { Delimiter } from "./expressions/delimiter";
@@ -11,7 +12,8 @@ import { Parser } from "./parser";
 import { Scanner } from "./scanner";
 
 export class Builder {
-  ruleSet: Record<string, Expression[]> = {};
+  private ruleSet: Record<string, Expression[]> = {};
+  private subrules: string[] = [];
 
   constructor() {}
 
@@ -26,6 +28,8 @@ export class Builder {
   }
 
   subrule(ruleName: string): Subrule {
+    this.subrules.push(ruleName);
+
     return new Subrule();
   }
 
@@ -74,8 +78,20 @@ export class Builder {
   }
 
   build(): Parser {
+    this.validate();
+
     return new Parser({
       ruleSet: this.ruleSet,
     });
+  }
+
+  private validate() {
+    for (const subrule of this.subrules) {
+      if (!this.ruleSet[subrule]) {
+        throw new RuleMissingError({
+          ruleName: subrule,
+        });
+      }
+    }
   }
 }

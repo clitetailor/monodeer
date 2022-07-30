@@ -6,7 +6,7 @@ export interface ParserOptions {
 }
 
 export class Parser {
-  ruleSet = {};
+  private ruleSet = {};
 
   constructor({ ruleSet }: ParserOptions) {
     this.ruleSet = ruleSet;
