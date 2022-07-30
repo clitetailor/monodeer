@@ -10,8 +10,9 @@ export class Seq implements Expression {
   subexprs: Expression[];
   notmatch?: (cursor: Cursor) => ExpressionResult;
 
-  constructor({ subexprs }: SeqOptions) {
+  constructor({ subexprs, notmatch }: SeqOptions) {
     this.subexprs = subexprs;
+    this.notmatch = notmatch;
   }
 
   parse(cursor: Cursor): ExpressionResult {

@@ -1,10 +1,16 @@
 import { Cursor } from "./cursor";
-import { ExpressionResult } from "./expression";
+import { Expression, ExpressionResult } from "./expression";
+
+export interface ParserOptions {
+  ruleSet: Record<string, Expression[]>;
+}
 
 export class Parser {
   ruleSet = {};
 
-  constructor() {}
+  constructor({ ruleSet }: ParserOptions) {
+    this.ruleSet = ruleSet;
+  }
 
   parse(rootRule: string, cursor: Cursor): ExpressionResult {
     return {
