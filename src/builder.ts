@@ -66,7 +66,13 @@ export class Builder {
     return new Delimiter();
   }
 
-  manyWithDelimiter(subexprs: Expression[], delimiter: string) {
-    return new ManyWithDelimiter();
+  manyWithDelimiter(subexprs: Expression[], delimiter: string | Expression) {
+    const delimiterExpr =
+      typeof delimiter === "string" ? this.consume(delimiter) : delimiter;
+
+    return new ManyWithDelimiter({
+      subexprs,
+      delimiter: delimiterExpr,
+    });
   }
 }

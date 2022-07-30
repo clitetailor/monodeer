@@ -3,10 +3,12 @@ import { Expression, ExpressionResult } from "../expression";
 
 interface SeqOptions {
   subexprs: Expression[];
+  notmatch?: (cursor: Cursor) => ExpressionResult;
 }
 
 export class Seq implements Expression {
   subexprs: Expression[];
+  notmatch?: (cursor: Cursor) => ExpressionResult;
 
   constructor({ subexprs }: SeqOptions) {
     this.subexprs = subexprs;
@@ -23,6 +25,10 @@ export class Seq implements Expression {
 
       if (!exprResult.match) {
         cursor.moveTo(marker);
+
+        if (this.notmatch) {
+          return this.notmatch(cursor);
+        }
 
         return {
           match: false,
