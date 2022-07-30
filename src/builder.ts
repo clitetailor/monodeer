@@ -1,4 +1,4 @@
-import { RuleMissingError } from "./errors/rule-missing";
+import { RootRuleError, SubruleError } from "./errors/rule";
 import { Expression } from "./expression";
 import { Consume } from "./expressions/consume";
 import { Delimiter } from "./expressions/delimiter";
@@ -11,8 +11,16 @@ import { Subrule } from "./expressions/subrule";
 import { Parser } from "./parser";
 import { Scanner } from "./scanner";
 
+export interface BuildOptions {
+  rootRule: string;
+}
+
+export interface ValidateOptions {
+  rootRule: string;
+}
+
 export class Builder {
-  private ruleSet: Record<string, Expression[]> = {};
+  private ruleSet: Record<string, Expression> = {};
   private subrules: string[] = [];
 
   constructor() {}
@@ -24,7 +32,9 @@ export class Builder {
   }
 
   rule(ruleName: string, subexprs: Expression[]) {
-    this.ruleSet[ruleName] = subexprs;
+    this.ruleSet[ruleName] = new Seq({
+      subexprs,
+    });
   }
 
   subrule(ruleName: string): Subrule {
@@ -77,21 +87,30 @@ export class Builder {
     });
   }
 
-  build(): Parser {
-    this.validate();
+  build({ rootRule }: BuildOptions): Parser {
+    this.validate({
+      rootRule,
+    });
 
     return new Parser({
       ruleSet: this.ruleSet,
+      rootRule,
     });
   }
 
-  private validate() {
+  private validate(options: ValidateOptions) {
     for (const subrule of this.subrules) {
       if (!this.ruleSet[subrule]) {
-        throw new RuleMissingError({
+        throw new SubruleError({
           ruleName: subrule,
         });
       }
+    }
+
+    if (!this.ruleSet[options.rootRule]) {
+      throw new RootRuleError({
+        ruleName: options.rootRule,
+      });
     }
   }
 }
