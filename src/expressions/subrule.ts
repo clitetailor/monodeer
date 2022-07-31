@@ -1,22 +1,27 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
+import { Extended, ExtendedOptions } from "./extended";
 
-export class Subrule implements Expression {
-  _transform?: (options: TransformOptions) => ExpressionResult;
+export interface SubruleOptions extends ExtendedOptions {
+  ruleSet: Record<string, Expression>;
+  ruleName: string;
+}
 
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
+export class Subrule extends Extended implements Expression {
+  private ruleSet: Record<string, Expression>;
+  private ruleName: string;
 
-    return this._transform ? this._transform(exprResult) : exprResult;
+  constructor({ ruleSet, ruleName, transform, otherwise }: SubruleOptions) {
+    super({
+      transform,
+      otherwise,
+    });
+
+    this.ruleSet = ruleSet;
+    this.ruleName = ruleName;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
-    return {
-      match: false,
-    };
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
+    return this.ruleSet[this.ruleName].parse(cursor);
   }
 }

@@ -9,7 +9,10 @@ export interface ExpressionResult {
   result?: any;
 }
 
-export interface TransformOptions {
-  result?: any;
-  match: boolean;
+export interface TransformOptions extends ExpressionResult {
+  cursor: Cursor;
+}
+
+export interface OtherwiseOptions extends ExpressionResult {
+  cursor: Cursor;
 }

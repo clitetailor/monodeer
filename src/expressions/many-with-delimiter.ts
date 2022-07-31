@@ -1,27 +1,32 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
+import { Extended, ExtendedOptions } from "./extended";
 import { Many } from "./many";
 import { Seq } from "./seq";
 
-interface ManyWithDelimiterOptions {
+interface ManyWithDelimiterOptions extends ExtendedOptions {
   atLeast?: number;
   subexprs: Expression[];
   delimiter: Expression;
-  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
-export class ManyWithDelimiter implements Expression {
-  atLeast: number;
-  head: Expression;
-  subseq: Expression;
-  _transform?: (options: TransformOptions) => ExpressionResult;
+export class ManyWithDelimiter extends Extended implements Expression {
+  private atLeast: number;
+  private head: Expression;
+  private subseq: Expression;
 
   constructor({
     atLeast,
     subexprs,
     delimiter,
     transform,
+    otherwise,
   }: ManyWithDelimiterOptions) {
+    super({
+      transform,
+      otherwise,
+    });
+
     this.atLeast = atLeast ?? 0;
 
     const element = new Seq({
@@ -33,14 +38,6 @@ export class ManyWithDelimiter implements Expression {
       atLeast: (atLeast ?? 1) - 1,
       subexprs: [delimiter, element],
     });
-
-    this._transform = transform;
-  }
-
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
-
-    return this._transform ? this._transform(exprResult) : exprResult;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
@@ -77,9 +74,5 @@ export class ManyWithDelimiter implements Expression {
       match: true,
       result: items,
     };
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
   }
 }

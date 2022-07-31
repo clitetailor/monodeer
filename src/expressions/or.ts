@@ -1,24 +1,21 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
+import { Extended, ExtendedOptions } from "./extended";
 
-interface OrOptions {
+interface OrOptions extends ExtendedOptions {
   subexprs: Expression[];
-  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
-export class Or implements Expression {
-  subexprs: Expression[];
-  _transform?: (option: TransformOptions) => ExpressionResult;
+export class Or extends Extended implements Expression {
+  private subexprs: Expression[];
 
-  constructor({ subexprs, transform }: OrOptions) {
+  constructor({ subexprs, transform, otherwise }: OrOptions) {
+    super({
+      transform,
+      otherwise,
+    });
+
     this.subexprs = subexprs;
-    this._transform = transform;
-  }
-
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
-
-    return this._transform ? this._transform(exprResult) : exprResult;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
@@ -37,9 +34,5 @@ export class Or implements Expression {
     return {
       match: false,
     };
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
   }
 }

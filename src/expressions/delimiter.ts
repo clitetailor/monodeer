@@ -1,18 +1,19 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
+import { Extended, ExtendedOptions } from "./extended";
 import { Seq } from "./seq";
 
-interface DelimiterOptions {
+interface DelimiterOptions extends ExtendedOptions {
   subexprs: Expression[];
   delimiter: Expression;
-  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
-export class Delimiter implements Expression {
-  subseq: Expression;
-  _transform?: (options: TransformOptions) => ExpressionResult;
+export class Delimiter extends Extended implements Expression {
+  private subseq: Expression;
 
-  constructor({ subexprs, delimiter, transform }: DelimiterOptions) {
+  constructor({ subexprs, delimiter, transform, otherwise }: DelimiterOptions) {
+    super({ transform, otherwise });
+
     const subseqSubexprs: Expression[] = subexprs
       .map((subexpr, index) => {
         return index > 0 ? [delimiter, subexpr] : [subexpr];
@@ -22,20 +23,9 @@ export class Delimiter implements Expression {
     this.subseq = new Seq({
       subexprs: subseqSubexprs,
     });
-    this._transform = transform;
-  }
-
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
-
-    return this._transform ? this._transform(exprResult) : exprResult;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
     return this.subseq.parse(cursor);
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
   }
 }

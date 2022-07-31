@@ -1,28 +1,25 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
+import { Extended, ExtendedOptions } from "./extended";
 import { Seq } from "./seq";
 
-export interface ManyOptions {
+export interface ManyOptions extends ExtendedOptions {
   atLeast?: number;
   subexprs: Expression[];
-  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
-export class Many implements Expression {
-  atLeast: number;
-  seq: Expression;
-  _transform?: (options: TransformOptions) => ExpressionResult;
+export class Many extends Extended implements Expression {
+  private atLeast: number;
+  private seq: Expression;
 
-  constructor({ subexprs, atLeast, transform }: ManyOptions) {
+  constructor({ subexprs, atLeast, transform, otherwise }: ManyOptions) {
+    super({
+      transform,
+      otherwise,
+    });
+
     this.seq = new Seq({ subexprs });
     this.atLeast = atLeast ?? 0;
-    this._transform = transform;
-  }
-
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
-
-    return this._transform ? this._transform(exprResult) : exprResult;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
@@ -53,9 +50,5 @@ export class Many implements Expression {
     return {
       match: false,
     };
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
   }
 }

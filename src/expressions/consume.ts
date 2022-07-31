@@ -1,25 +1,22 @@
 import { Cursor } from "../cursor";
 import { Expression, ExpressionResult, TransformOptions } from "../expression";
 import { Scanner } from "../scanner";
+import { Extended, ExtendedOptions } from "./extended";
 
-interface ConsumeOptions {
+interface ConsumeOptions extends ExtendedOptions {
   tokenOrScanner: Scanner | string | RegExp;
-  transform?: (options: TransformOptions) => ExpressionResult;
 }
 
-export class Consume implements Expression {
-  token: Scanner | string | RegExp;
-  _transform?: (options: TransformOptions) => ExpressionResult;
+export class Consume extends Extended implements Expression {
+  private token: Scanner | string | RegExp;
 
-  constructor({ tokenOrScanner, transform }: ConsumeOptions) {
+  constructor({ tokenOrScanner, transform, otherwise }: ConsumeOptions) {
+    super({
+      transform,
+      otherwise,
+    });
+
     this.token = tokenOrScanner;
-    this._transform = transform;
-  }
-
-  parse(cursor: Cursor): ExpressionResult {
-    const exprResult = this._parse(cursor);
-
-    return this._transform ? this._transform(exprResult) : exprResult;
   }
 
   _parse(cursor: Cursor): ExpressionResult {
@@ -77,9 +74,5 @@ export class Consume implements Expression {
     return {
       match: false,
     };
-  }
-
-  transform(transformer: (option: TransformOptions) => ExpressionResult) {
-    this._transform = transformer;
   }
 }
