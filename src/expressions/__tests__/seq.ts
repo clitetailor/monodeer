@@ -93,18 +93,18 @@ test("'seq' expression should not match seq pattern", () => {
   const iter = t
     .capture(
       `
-        🌵\\bold {Today is Monday}🌵
+        🌵🌵\\bold {Today is Monday}
       `
     )
     .toIter();
 
   const start = iter.next();
-  const startIndex = start.index;
+  const end = iter.next();
 
   const exprResult = seq.parse(start);
 
   expect(exprResult).toEqual({
     match: false,
   });
-  expect(start.isAt(startIndex)).toBeTruthy();
+  expect(start.isAt(end)).toBeTruthy();
 });

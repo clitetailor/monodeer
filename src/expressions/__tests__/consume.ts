@@ -69,17 +69,17 @@ test("'consume' expression should not match regexp pattern", () => {
     tokenOrScanner: /([a-z]+)=[ ]*(\d+)/,
   });
 
-  const iter = t.capture("🌵total: 12345🌵").toIter();
+  const iter = t.capture("🌵🌵total: 12345").toIter();
 
   const start = iter.next();
-  const startIndex = start.index;
+  const end = iter.next();
 
   const exprResult = consume.parse(start);
 
   expect(exprResult).toEqual({
     match: false,
   });
-  expect(start.isAt(startIndex)).toBeTruthy();
+  expect(start.isAt(end)).toBeTruthy();
 });
 
 const blockScanner = (cursor: Cursor): ExpressionResult => {
@@ -166,15 +166,15 @@ test("'consume' expression should not be scanned", () => {
     tokenOrScanner: blockScanner,
   });
 
-  const iter = t.capture("🌵====={Hello, World!}==🌵").toIter();
+  const iter = t.capture("🌵🌵====={Hello, World!}==").toIter();
 
   const start = iter.next();
-  const startIndex = start.index;
+  const end = iter.next()
 
   const exprResult = consume.parse(start);
 
   expect(exprResult).toEqual({
     match: false,
   });
-  expect(start.isAt(startIndex)).toBeTruthy();
+  expect(start.isAt(end)).toBeTruthy();
 });
