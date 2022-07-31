@@ -64,6 +64,8 @@ export class Consume implements Expression {
     const matchResult = cursor.exec(regExp);
 
     if (matchResult) {
+      cursor.next(matchResult[0].length);
+
       return {
         match: true,
         result: {
