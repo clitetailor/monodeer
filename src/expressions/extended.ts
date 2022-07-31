@@ -8,7 +8,7 @@ import {
 
 export interface ExtendedOptions {
   transform?: (options: TransformOptions) => any;
-  otherwise?: (options: TransformOptions) => any;
+  otherwise?: (options: OtherwiseOptions) => any;
 }
 
 export abstract class Extended implements Expression {
