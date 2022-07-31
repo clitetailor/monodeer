@@ -32,6 +32,7 @@ export class Option extends Extended implements Expression {
 
     return {
       match: true,
+      result: null,
     };
   }
 }

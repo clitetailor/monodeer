@@ -69,7 +69,7 @@ test("'many' expression should not match many pattern with at least option", () 
   expect(start.isAt(end));
 });
 
-test("'many' expression should not match incorrect pattern", () => {
+test("'many' expression should not match invalid pattern", () => {
   const iter = t.capture(`🌵🌵1.  2.  3.  4.  5.`).toIter();
 
   const start = iter.next();

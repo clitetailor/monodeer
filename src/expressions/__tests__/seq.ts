@@ -89,7 +89,7 @@ test("'seq' expression should match seq pattern", () => {
   expect(start.isAt(end)).toBeTruthy();
 });
 
-test("'seq' expression should not match seq pattern", () => {
+test("'seq' expression should not match invalid pattern", () => {
   const iter = t
     .capture(
       `
